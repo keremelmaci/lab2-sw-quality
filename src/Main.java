@@ -1,42 +1,53 @@
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        SWSystem system = SWSystemData.createShopSphere();
+        HashMap<String, ArrayList<SWSystem>> allSystems = SWSystemData.getAllSystems();
 
-        System.out.println("=== SOFTWARE QUALITY EVALUATION SYSTEM ===");
-        System.out.println("System: " + system.getSystemName() + " v" + system.getVersion());
-        System.out.println("Category: " + system.getCategory());
+        ArrayList<SWSystem> webSystems = allSystems.get("Web");
+        if (webSystems == null || webSystems.isEmpty()) {
+            System.out.println("No Web systems found.");
+            return;
+        }
 
-        for (QualityDimension dimension : system.getDimensions()) {
-            System.out.println("\n--- Enter values for " + dimension.getName() + " ---");
-
-            for (Criterion criterion : dimension.getCriteria()) {
-                double value;
-
-                while (true) {
-                    System.out.print(
-                            criterion.getName() +
-                                    " (" + criterion.getUnit() +
-                                    ", min=" + criterion.getMinValue() +
-                                    ", max=" + criterion.getMaxValue() +
-                                    ", " + criterion.getDirection() + " is better): "
-                    );
-
-                    if (scanner.hasNextDouble()) {
-                        value = scanner.nextDouble();
-                        criterion.setMeasuredValue(value);
-                        break;
-                    } else {
-                        System.out.println("Invalid input. Please enter a numeric value.");
-                        scanner.next();
-                    }
-                }
+        SWSystem shopSphere = null;
+        for (SWSystem system : webSystems) {
+            if (system.getSystemName().equals("ShopSphere")) {
+                shopSphere = system;
+                break;
             }
         }
 
-        system.printReport();
-        scanner.close();
+        if (shopSphere == null) {
+            System.out.println("ShopSphere system not found.");
+            return;
+        }
+
+        for (QualityDimension d : shopSphere.getDimensions()) {
+            switch (d.getIsoCode()) {
+                case "QC.FS":
+                    d.getCriteria().get(0).setMeasuredValue(94);   // Functional Completeness Ratio
+                    d.getCriteria().get(1).setMeasuredValue(91);   // Functional Correctness Ratio
+                    break;
+
+                case "QC.RE":
+                    d.getCriteria().get(0).setMeasuredValue(99.2); // Availability Ratio
+                    d.getCriteria().get(1).setMeasuredValue(2.1);  // Defect Density
+                    break;
+
+                case "QC.PE":
+                    d.getCriteria().get(0).setMeasuredValue(220);  // Response Time
+                    d.getCriteria().get(1).setMeasuredValue(38);   // CPU Utilisation Ratio
+                    break;
+
+                case "QC.MA":
+                    d.getCriteria().get(0).setMeasuredValue(72);   // Test Coverage Ratio
+                    d.getCriteria().get(1).setMeasuredValue(8.5);  // Cyclomatic Complexity
+                    break;
+            }
+        }
+
+        shopSphere.printReport();
     }
 }

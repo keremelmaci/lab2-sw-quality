@@ -34,6 +34,10 @@ public class QualityDimension {
     }
 
     public double calculateDimensionScore() {
+        if (criteria.isEmpty()) {
+            return 0.0;
+        }
+
         double weightedSum = 0.0;
         double totalWeight = 0.0;
 
@@ -42,9 +46,12 @@ public class QualityDimension {
             totalWeight += c.getWeight();
         }
 
-        if (totalWeight == 0) return 0.0;
+        if (totalWeight == 0) {
+            return 0.0;
+        }
 
-        return Math.round((weightedSum / totalWeight) * 10.0) / 10.0;
+        double score = weightedSum / totalWeight;
+        return Math.round(score * 10.0) / 10.0;
     }
 
     public double calculateQualityGap() {
@@ -58,5 +65,10 @@ public class QualityDimension {
         if (score >= 3.5) return "Good Quality";
         if (score >= 2.5) return "Needs Improvement";
         return "Poor Quality";
+    }
+
+    @Override
+    public String toString() {
+        return name + " [" + isoCode + "]";
     }
 }
